@@ -10,98 +10,148 @@
         <strong v-if="!isMobile" class="header-text">{{ titleText }}</strong>
       </a>
       <nav class="button-group">
-        <a
-          v-if="!isMobile"
-          href="https://wechat.jeffjade.com/"
-          class="header-link"
-          target="_blank"
-          rel="noopener"
-        >
-          <span class="hint--bottom" aria-label="公众号 Markdown 排版">
-            <icon class="header-icon" name="wechat" />
+        <template v-if="isMobile">
+          <span class="hint--bottom header-link" @click="$emit('toggle-sidebar')" aria-label="文档列表">
+            <icon class="header-icon" name="sidebar" />
           </span>
-        </a>
-        <a href="https://www.niceshare.site/" class="header-link" target="_blank" rel="noopener">
-          <span class="hint--bottom" aria-label="逍遥自在轩">
-            <icon class="header-icon" name="homepage" />
+          <div class="mode-switch" aria-label="编辑模式切换">
+            <button
+              type="button"
+              class="mode-switch__btn"
+              :class="{ 'mode-switch__btn--active': activeMode === 'wysiwyg' }"
+              @click="onModeSwitch('wysiwyg')"
+            >
+              可视
+            </button>
+            <button
+              type="button"
+              class="mode-switch__btn"
+              :class="{ 'mode-switch__btn--active': activeMode === 'sv' && activePreviewMode === 'editor' }"
+              @click="onModeSwitch('sv-editor')"
+            >
+              MD
+            </button>
+            <button
+              type="button"
+              class="mode-switch__btn"
+              :class="{ 'mode-switch__btn--active': activeMode === 'sv' && activePreviewMode === 'both' }"
+              @click="onModeSwitch('sv-both')"
+            >
+              分屏
+            </button>
+            <button type="button" class="mode-switch__btn mode-switch__btn--danger" @click="onClearContent">
+              清空
+            </button>
+          </div>
+          <el-dropdown trigger="click" @command="handleMobileCommand">
+            <span class="hint--bottom el-dropdown-link" aria-label="更多功能">
+              <icon class="header-icon" name="setting" />
+            </span>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item command="copy-plain-text">
+                复制纯文本
+              </el-dropdown-item>
+              <el-dropdown-item command="toggle-toolbar">
+                {{ toolbarHidden ? '展开编辑工具' : '折叠编辑工具' }}
+              </el-dropdown-item>
+              <el-dropdown-item command="import">导入文件</el-dropdown-item>
+              <el-dropdown-item command="/export/ppt">预览 PPT</el-dropdown-item>
+              <el-dropdown-item command="/export/png">导出 PNG</el-dropdown-item>
+              <el-dropdown-item command="/export/pdf">导出 PDF</el-dropdown-item>
+              <el-dropdown-item command="/about-arya">关于 Arya</el-dropdown-item>
+              <el-dropdown-item command="fullscreen">全屏</el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+        </template>
+        <template v-else>
+          <a
+            href="https://wechat.jeffjade.com/"
+            class="header-link"
+            target="_blank"
+            rel="noopener"
+          >
+            <span class="hint--bottom" aria-label="公众号 Markdown 排版">
+              <icon class="header-icon" name="wechat" />
+            </span>
+          </a>
+          <a href="https://www.niceshare.site/" class="header-link" target="_blank" rel="noopener">
+            <span class="hint--bottom" aria-label="逍遥自在轩">
+              <icon class="header-icon" name="homepage" />
+            </span>
+          </a>
+          <a href="https://www.lovejade.cn/" class="header-link" target="_blank" rel="noopener">
+            <span class="hint--bottom" aria-label="清风明月轩">
+              <icon class="header-icon" name="home" />
+            </span>
+          </a>
+          <a
+            href="https://x.com/MarshalXuan"
+            class="header-link"
+            target="_blank"
+            rel="noopener"
+          >
+            <span class="hint--bottom" aria-label="X - 轩帅">
+              <icon class="header-icon" name="x" />
+            </span>
+          </a>
+          <a
+            href="https://github.com/nicejade"
+            class="header-link"
+            target="_blank"
+            rel="noopener"
+          >
+            <span class="hint--bottom" aria-label="作者 Github">
+              <icon class="header-icon" name="github" />
+            </span>
+          </a>
+          <router-link to="/about-arya" class="header-link">
+            <span class="hint--bottom" aria-label="关于 Arya">
+              <icon class="header-icon" name="document" />
+            </span>
+          </router-link>
+          <span class="hint--bottom" @click="onImportClick" aria-label="导入文件">
+            <icon class="header-icon" name="upload" />
           </span>
-        </a>
-        <a href="https://www.lovejade.cn/" class="header-link" target="_blank" rel="noopener">
-          <span class="hint--bottom" aria-label="清风明月轩">
-            <icon class="header-icon" name="home" />
+          <el-dropdown trigger="click" @command="handleCommand">
+            <span class="hint--bottom el-dropdown-link" aria-label="设置">
+              <icon class="header-icon" name="setting" />
+            </span>
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item command="copy-plain-text">
+                <span class="dropdown-text">复制纯文本</span>
+              </el-dropdown-item>
+              <el-dropdown-item disabled>
+                <icon class="dropdown-icon" name="set-style" />
+                <a href="/export/jpeg" target="_self" class="dropdown-text">自定义样式</a>
+              </el-dropdown-item>
+              <el-dropdown-item command="/export/ppt" divided>
+                <icon class="dropdown-icon" name="preview" />
+                <a href="/export/ppt" target="_self" class="dropdown-text">
+                  {{ exportTextMap['/export/ppt'] }}
+                </a>
+              </el-dropdown-item>
+              <el-dropdown-item command="/export/png" divided>
+                <icon class="dropdown-icon" name="download" />
+                <a href="/export/png" target="_self" class="dropdown-text">{{
+                  exportTextMap['/export/png']
+                }}</a>
+              </el-dropdown-item>
+              <el-dropdown-item command="/export/pdf">
+                <icon class="dropdown-icon" name="download" />
+                <a href="/export/pdf" target="_self" class="dropdown-text">
+                  {{ exportTextMap['/export/pdf'] }}
+                </a>
+              </el-dropdown-item>
+              <el-dropdown-item command="/export/html" disabled divided>
+                <icon class="dropdown-icon" name="download" />
+                <a href="/export/html" target="_self" class="dropdown-text">导出 HTML</a>
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </el-dropdown>
+          <span class="hint--bottom full-screen" @click="onFullScreenClick" aria-label="全屏">
+            <icon class="header-icon" name="full-screen" />
           </span>
-        </a>
-        <a
-          v-if="!isMobile"
-          href="https://x.com/MarshalXuan"
-          class="header-link"
-          target="_blank"
-          rel="noopener"
-        >
-          <span class="hint--bottom" aria-label="X - 轩帅">
-            <icon class="header-icon" name="x" />
-          </span>
-        </a>
-        <a
-          v-if="!isMobile"
-          href="https://github.com/nicejade"
-          class="header-link"
-          target="_blank"
-          rel="noopener"
-        >
-          <span class="hint--bottom" aria-label="作者 Github">
-            <icon class="header-icon" name="github" />
-          </span>
-        </a>
-        <router-link to="/about-arya" class="header-link">
-          <span class="hint--bottom" aria-label="关于 Arya">
-            <icon class="header-icon" name="document" />
-          </span>
-        </router-link>
-        <span class="hint--bottom" @click="onImportClick" aria-label="导入文件">
-          <icon class="header-icon" name="upload" />
-        </span>
-        <el-dropdown trigger="click" @command="handleCommand">
-          <span class="hint--bottom el-dropdown-link" aria-label="设置">
-            <icon class="header-icon" name="setting" />
-          </span>
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item disabled>
-              <icon class="dropdown-icon" name="set-style" />
-              <a href="/export/jpeg" target="_self" class="dropdown-text">自定义样式</a>
-            </el-dropdown-item>
-            <el-dropdown-item command="/export/ppt" divided>
-              <icon class="dropdown-icon" name="preview" />
-              <a href="/export/ppt" target="_self" class="dropdown-text">
-                {{ exportTextMap['/export/ppt'] }}
-              </a>
-            </el-dropdown-item>
-            <el-dropdown-item command="/export/png" divided>
-              <icon class="dropdown-icon" name="download" />
-              <a href="/export/png" target="_self" class="dropdown-text">{{
-                exportTextMap['/export/png']
-              }}</a>
-            </el-dropdown-item>
-            <el-dropdown-item command="/export/pdf">
-              <icon class="dropdown-icon" name="download" />
-              <a href="/export/pdf" target="_self" class="dropdown-text">
-                {{ exportTextMap['/export/pdf'] }}
-              </a>
-            </el-dropdown-item>
-            <el-dropdown-item command="/export/html" disabled divided>
-              <icon class="dropdown-icon" name="download" />
-              <a href="/export/html" target="_self" class="dropdown-text">导出 HTML</a>
-            </el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown>
-        <span
-          v-if="!isMobile"
-          class="hint--bottom full-screen"
-          @click="onFullScreenClick"
-          aria-label="全屏"
-        >
-          <icon class="header-icon" name="full-screen" />
-        </span>
+        </template>
       </nav>
     </h1>
   </header>
@@ -113,18 +163,59 @@ import { exportTextMap } from '@config/constant'
 import { createDocument, setActiveDocId, saveDocContent } from '@helper/storage'
 import { trackEvent } from '@helper/analytics'
 
+const MOBILE_BREAKPOINT = 1200
+const detectMobileViewport = () => {
+  const hasCoarsePointer =
+    typeof window.matchMedia === 'function' && window.matchMedia('(pointer: coarse)').matches
+  return window.innerWidth <= MOBILE_BREAKPOINT || hasCoarsePointer
+}
+
 export default {
   name: 'HeaderNav',
 
+  props: {
+    activeMode: {
+      type: String,
+      default: 'sv',
+    },
+    activePreviewMode: {
+      type: String,
+      default: 'both',
+    },
+    toolbarHidden: {
+      type: Boolean,
+      default: false,
+    },
+  },
+
   data() {
     return {
-      isMobile: window.innerWidth <= 768,
+      isMobile: detectMobileViewport(),
       titleText: window.$appTitle,
       exportTextMap,
     }
   },
 
+  mounted() {
+    window.addEventListener('resize', this.onResize)
+  },
+
+  beforeDestroy() {
+    window.removeEventListener('resize', this.onResize)
+  },
+
   methods: {
+    onResize() {
+      this.isMobile = detectMobileViewport()
+    },
+    onModeSwitch(mode) {
+      this.$emit('switch-mode', mode)
+      trackEvent('header_switch_mode', 'header', mode)
+    },
+    onClearContent() {
+      this.$emit('clear-content')
+      trackEvent('header_clear_content', 'header', 'click')
+    },
     launchFullScreen() {
       const element = document.getElementById('vditor')
       if (element.requestFullscreen) {
@@ -149,6 +240,16 @@ export default {
       }
     },
     onThemeClick() {},
+    emitPreviewAction(command) {
+      const typeMap = {
+        'copy-plain-text': 'copy-plain-text',
+      }
+      const type = typeMap[command]
+      if (!type) return false
+      this.$emit('preview-action', type)
+      trackEvent('header_preview_action', 'header', type)
+      return true
+    },
     onFullScreenClick() {
       const isFullScreen =
         document.fullscreenElement ||
@@ -159,8 +260,29 @@ export default {
       trackEvent('header_full_screen', 'header', isFullScreen ? 'exit' : 'enter')
     },
     handleCommand(command) {
+      if (this.emitPreviewAction(command)) return
       this.$router.push(command)
       trackEvent('header_export', 'header', command)
+    },
+    handleMobileCommand(command) {
+      if (this.emitPreviewAction(command)) return
+      if (command === 'toggle-toolbar') {
+        this.$emit('toggle-toolbar')
+        trackEvent('header_mobile_command', 'header', command)
+        return
+      }
+      if (command === 'import') {
+        this.onImportClick()
+        return
+      }
+      if (command === 'fullscreen') {
+        this.onFullScreenClick()
+        return
+      }
+      if (command.startsWith('/')) {
+        this.$router.push(command)
+        trackEvent('header_mobile_command', 'header', command)
+      }
     },
     onImportClick() {
       trackEvent('header_import_click', 'header')
@@ -266,6 +388,42 @@ export default {
 
     .button-group {
       float: right;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      .mode-switch {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin: 0 4px;
+
+        .mode-switch__btn {
+          height: 30px;
+          line-height: 28px;
+          padding: 0 8px;
+          font-size: 12px;
+          color: @deep-black;
+          background: #fff;
+          border: 1px solid @border-grey;
+          border-radius: 6px;
+          white-space: nowrap;
+          cursor: pointer;
+          transition: all 0.2s ease;
+        }
+
+        .mode-switch__btn--active {
+          color: #fff;
+          border-color: @brand;
+          background: @brand;
+        }
+
+        .mode-switch__btn--danger {
+          color: #d23f31;
+          border-color: #f3b2ad;
+          background: #fff7f7;
+        }
+      }
 
       .header-icon {
         margin: 0 10px;
@@ -279,18 +437,69 @@ export default {
   }
 }
 
-@media (max-width: 960px) {
+@media (max-width: 1200px) {
   .header-wrapper {
     .header-area {
       display: flex;
       width: 100%;
       padding: 0 10px;
-      .flex-box-center(row, space-between);
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
 
       .header-link {
-        display: inline;
+        display: inline-flex;
+        align-items: center;
+      }
+
+      .mark-markdown {
+        width: 40px;
+      }
+
+      .button-group {
+        float: none;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        max-width: calc(100% - 50px);
+        overflow-x: auto;
+        overflow-y: hidden;
+        white-space: nowrap;
+        scrollbar-width: none;
+
+        .mode-switch {
+          max-width: calc(100vw - 120px);
+          overflow-x: auto;
+          overflow-y: hidden;
+          padding-bottom: 2px;
+          scrollbar-width: none;
+
+          .mode-switch__btn {
+            height: 28px;
+            line-height: 26px;
+            padding: 0 6px;
+            min-width: 42px;
+            font-size: 11px;
+          }
+
+          &::-webkit-scrollbar {
+            display: none;
+          }
+        }
+
+        &::-webkit-scrollbar {
+          display: none;
+        }
+
+        .header-icon {
+          margin: 0 6px;
+        }
       }
     }
+  }
+
+  .hint--bottom::after {
+    display: none;
   }
 }
 </style>

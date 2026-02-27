@@ -1,7 +1,7 @@
 <!-- @format -->
 
 <template>
-  <aside class="sidebar" :class="{ collapsed: collapsed }">
+  <aside class="sidebar" :class="{ collapsed: collapsed, 'sidebar--mobile': isMobile }">
     <div
       v-show="collapsed"
       class="sidebar__toggle"
@@ -82,6 +82,10 @@ export default {
 
   props: {
     collapsed: {
+      type: Boolean,
+      default: false,
+    },
+    isMobile: {
       type: Boolean,
       default: false,
     },
@@ -371,6 +375,41 @@ export default {
       width: 16px;
       height: 16px;
     }
+  }
+}
+
+.sidebar.sidebar--mobile {
+  width: 82vw;
+  max-width: 320px;
+  box-shadow: 10px 0 30px rgba(15, 23, 42, 0.2);
+  animation: sidebarSlideIn 0.2s ease;
+
+  .sidebar__header {
+    padding-top: 14px;
+  }
+
+  .sidebar__list {
+    padding: 8px;
+  }
+
+  .sidebar__item {
+    padding: 10px 12px;
+
+    .sidebar__item-actions {
+      opacity: 1;
+    }
+  }
+}
+
+@keyframes sidebarSlideIn {
+  from {
+    transform: translateX(-18px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
   }
 }
 </style>
