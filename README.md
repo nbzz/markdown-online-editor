@@ -61,6 +61,18 @@
 - [x] 🌟 新增复制到微信公众号等周边功能；
 - [x] 🌟 支持导入本地 Markdown（`*.md`） 文件；
 
+## 二次开发更新（2026-02-27）
+
+本分支在原项目基础上，重点做了移动端可用性优化：
+
+- [x] 📱 适配手机分辨率，限制横向溢出，避免页面整体左右滑动；
+- [x] 🗂️ 增加文档侧边栏（新建、重命名、删除、切换文档），支持移动端抽屉 + 遮罩交互；
+- [x] 🎛️ 移动端头部常驻四个按钮：`可视`、`MD`、`分屏`、`清空`；
+- [x] 🧰 移动端编辑器工具栏默认折叠，可在设置菜单中展开/折叠；
+- [x] ⌨️ 视图切换时，移动端不再自动抢焦点弹出键盘；
+- [x] 📋 新增“复制纯文本”（去 Markdown 标记，适合直接粘贴到微信聊天），并在桌面/移动端设置菜单全局可用；
+- [x] 🧹 精简分屏相关设置项，移除 `桌面 / 平板 / 手机 / 公众号 / 知乎` 等入口。
+
 ## 如何使用
 
 清空目前 [Arya](https://markdown.lovejade.cn/?ref=github.com) 编辑区默认文档，即可使用。
@@ -158,6 +170,30 @@ docker-compose up -d
    - `YARN_ENABLE_IMMUTABLE_INSTALLS` = `false`
    - `NODE_OPTIONS` = `--openssl-legacy-provider`
 4. 保存即可自动构建并上线。后续每次 `git push` 会触发重新部署。
+
+### Vercel 托管
+
+可直接托管在 **Vercel**，适合前端静态站点快速上线。
+
+1. 在 GitHub 中 fork 仓库，并确保代码已推送到你的 fork 分支。
+2. 在 Vercel 中新建项目，导入你的 fork 仓库。
+3. 构建参数建议如下：
+   - **Framework Preset**：`Vue.js`
+   - **Install Command**：`yarn install --frozen-lockfile`
+   - **Build Command**：`NODE_OPTIONS=--openssl-legacy-provider yarn build`
+   - **Output Directory**：`dist`
+   - **Node.js Version**：`20.x`
+4. 本仓库已在根目录内置 `vercel.json`（用于 `vue-router history` 刷新防 404）；如果在其他项目复用，可参考如下配置：
+
+```json
+{
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+}
+```
+
+5. 重新部署即可。
+
+> 说明：如果使用 Vercel 默认 Node 24，可能出现 `ERR_OSSL_EVP_UNSUPPORTED`（`digital envelope routines::unsupported`）；以上配置已包含对应规避方案。
 
 ## 如何开发
 
